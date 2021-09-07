@@ -69,7 +69,7 @@ pipeline {
     post {
         cleanup {
             echo "Post actions"
-            sh 'docker system prune -f'
+            sh 'docker image prune -f'
             cleanWs()
         }
     }
