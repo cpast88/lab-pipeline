@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'build-server'
+    }
     environment {
         COMMIT_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         HARBOR_REGISTRY = 'harbor.dev.afsmtddso.com'
