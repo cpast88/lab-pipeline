@@ -70,7 +70,7 @@ pipeline {
         cleanup {
             echo "Post actions"
             sh 'docker image prune -f'
-            cleanWs()
+            sh 'rm -rf ./*'
         }
     }
 }
