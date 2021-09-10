@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        COMMIT_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+        PIPELINE_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         HARBOR_REGISTRY = 'harbor.dev.afsmtddso.com'
         HARBOR_REPOSITORY = 'devsecops-lab'
         APP_IMAGE_NAME = 'lab'
@@ -15,6 +15,11 @@ pipeline {
             steps {
                 echo "Cloning application repository"
                 sh 'git clone https://github.com/LinvernSS/afs-labs.git'
+                dir('afs-labs') {
+                    script{
+                        env.APP_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    }
+                }
             }
         }
         stage('Application docker build') {
@@ -24,8 +29,8 @@ pipeline {
                     script{
                         docker.build('$APP_IMAGE_NAME', '-f ./app/Dockerfile ./afs-labs')
                         docker.withRegistry('https://$HARBOR_REGISTRY', 'harbor-auth') {
-                            sh 'docker tag $APP_IMAGE_NAME $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$APP_IMAGE_NAME:$COMMIT_HASH'
-                            sh 'docker push $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$APP_IMAGE_NAME:$COMMIT_HASH'
+                            sh 'docker tag $APP_IMAGE_NAME $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$APP_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
+                            sh 'docker push $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$APP_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
                         }
                     }
                 }
@@ -38,8 +43,8 @@ pipeline {
                     script{
                         docker.build('$DB_IMAGE_NAME', '-f ./db/Dockerfile ./afs-labs')
                         docker.withRegistry('https://$HARBOR_REGISTRY', 'harbor-auth') {
-                            sh 'docker tag $DB_IMAGE_NAME $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$DB_IMAGE_NAME:$COMMIT_HASH'
-                            sh 'docker push $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$DB_IMAGE_NAME:$COMMIT_HASH'
+                            sh 'docker tag $DB_IMAGE_NAME $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$DB_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
+                            sh 'docker push $HARBOR_REGISTRY/$HARBOR_REPOSITORY/$DB_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
                         }
                     }
                 }
