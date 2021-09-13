@@ -68,6 +68,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deployment stage"
+                sh 'kubectl -n default set image deploy/lab-deployment farm=$HARBOR_REGISTRY/$HARBOR_REPOSITORY/$APP_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
+                sh 'kubectl -n default set image deploy/db-deployment db=$HARBOR_REGISTRY/$HARBOR_REPOSITORY/$DB_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
             }
         }
     }
