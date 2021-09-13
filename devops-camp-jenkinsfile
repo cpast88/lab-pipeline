@@ -75,7 +75,7 @@ pipeline {
         cleanup {
             echo "Post actions"
             sh 'docker image prune -a -f'
-            sh 'rm -rf ./* .git'
+            sh 'rm -rf .git ./*'
         }
     }
 }
